@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { firebase } from "../firebase"
-
-const collatedTasksExist = () => {}
+import { collatedTasksExist } from "../helpers/index"
+import moment from "moment"
 
 export const useTasks = selectedProject => {
   const [tasks, setTasks] = useState([])
@@ -14,6 +14,8 @@ export const useTasks = selectedProject => {
       .where("userId", "==", "22796")
 
     // GET task for selected project
+    // if selectedProject and it does not exists in collated Tasks
+    // set unsubscribe equal to project == selectedProject
     unsubscribe =
       selectedProject && !collatedTasksExist(selectedProject)
         ? (unsubscribe = unsubscribe.where("projectId", "== ", selectedProject))
