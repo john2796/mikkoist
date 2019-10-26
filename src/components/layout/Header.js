@@ -1,5 +1,22 @@
 import React from "react"
+import { FaPizzaSlice, FaAngellist } from "react-icons/fa"
 
 export const Header = () => {
-  return <p>Header</p>
+  return (
+    <header className="header" data-testid="header">
+      <nav>
+        <div className="logo">
+          <FaAngellist />
+        </div>
+        <div className="settings">
+          <ul>
+            <li>+</li>
+            <li>
+              <FaPizzaSlice />
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+  )
 }
