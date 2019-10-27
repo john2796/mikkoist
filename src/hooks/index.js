@@ -5,6 +5,7 @@ import moment from "moment"
 
 export const useTasks = selectedProject => {
   const [tasks, setTasks] = useState([])
+  const [archivedTasks, setArchivedTasks] = useState([])
 
   useEffect(() => {
     // GET tasks
@@ -13,13 +14,13 @@ export const useTasks = selectedProject => {
       .collection("tasks")
       .where("userId", "==", "22796")
 
-    // GET task for selected project
-    // if selectedProject and it does not exists in collated Tasks
-    // set unsubscribe equal to project == selectedProject
+    /* Note :
+     - if you're passing selectedProject and if it doesn't exists in the collatedTasksExist
+     */
     unsubscribe =
       selectedProject && !collatedTasksExist(selectedProject)
-        ? (unsubscribe = unsubscribe.where("projectId", "== ", selectedProject))
-        : selectedProject == "TODAY"
+        ? (unsubscribe = unsubscribe.where("projectId", "==", selectedProject))
+        : selectedProject === "TODAY"
         ? (unsubscribe = unsubscribe.where(
             "date",
             "==",
@@ -28,5 +29,52 @@ export const useTasks = selectedProject => {
         : selectedProject === "INBOX" || selectedProject === 0
         ? (unsubscribe = unsubscribe.where("date", "==", ""))
         : unsubscribe
+
+    unsubscribe = unsubscribe.onSnapshot(snapshot => {
+      const newTasks = snapshot.docs.map(task => ({
+        id: task.id,
+        ...task.data()
+      }))
+      // GET  next 7 Tasks
+      setTasks(
+        selectedProject === "NEXT_7"
+          ? newTasks.filter(
+              task =>
+                moment(task.date, "DD-MM-YYYY").diff(moment(), "days") <= 7 &&
+                task.archived !== true
+            )
+          : newTasks.filter(task => task.archived !== true)
+      )
+      // GET task that is no false
+      setArchivedTasks(newTasks.filter(task => task.archived !== false))
+    })
+    return () => unsubscribe()
   }, [selectedProject])
+  return { tasks, archivedTasks }
+}
+
+export const useProjects = () => {
+  const [projects, setProjects] = useState([])
+
+  useEffect(() => {
+    firebase
+      .firestore()
+      .collection("projects")
+      .where("userId", "==", "22796")
+      .orderBy("projectId")
+      .get()
+      .then(snapshot => {
+        const allProjects = snapshot.docs.map(project => ({
+          ...project.data(),
+          docId: project.id
+        }))
+
+        // prevent infinite loop
+        if (JSON.stringify(allProjects) !== JSON.stringify(projects)) {
+          setProjects(allProjects)
+        }
+      })
+  }, [projects])
+
+  return { projects, setProjects }
 }
