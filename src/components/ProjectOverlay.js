@@ -1,13 +1,13 @@
-import React from "react"
-import PropTypes from "prop-types"
-import { useProjectsValue } from "../context"
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useProjectsValue } from '../context';
 
 export const ProjectOverlay = ({
   setProject,
   showProjectOverlay,
-  setShowProjectOverlay
+  setShowProjectOverlay,
 }) => {
-  const { projects } = useProjectsValue()
+  const { projects } = useProjectsValue();
 
   return (
     projects &&
@@ -19,12 +19,12 @@ export const ProjectOverlay = ({
               <div
                 data-testid="project-overlay-action"
                 onClick={() => {
-                  setProject(project.projectId)
-                  setShowProjectOverlay(false)
+                  setProject(project.projectId);
+                  setShowProjectOverlay(false);
                 }}
                 onKeyDown={() => {
-                  setProject(project.projectId)
-                  setShowProjectOverlay(false)
+                  setProject(project.projectId);
+                  setShowProjectOverlay(false);
                 }}
                 role="button"
                 tabIndex={0}
@@ -37,9 +37,9 @@ export const ProjectOverlay = ({
         </ul>
       </div>
     )
-  )
-}
+  );
+};
 
 ProjectOverlay.propTypes = {
-  projects: PropTypes.array
-}
+  projects: PropTypes.array,
+};

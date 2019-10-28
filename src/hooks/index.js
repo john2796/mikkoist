@@ -1,80 +1,77 @@
-import { useState, useEffect } from "react"
-import { firebase } from "../firebase"
-import { collatedTasksExist } from "../helpers/index"
-import moment from "moment"
+/* eslint-disable no-nested-ternary */
+import { useState, useEffect } from 'react';
+import moment from 'moment';
+import { firebase } from '../firebase';
+import { collatedTasksExist } from '../helpers';
 
 export const useTasks = selectedProject => {
-  const [tasks, setTasks] = useState([])
-  const [archivedTasks, setArchivedTasks] = useState([])
+  const [tasks, setTasks] = useState([]);
+  const [archivedTasks, setArchivedTasks] = useState([]);
 
   useEffect(() => {
-    // GET tasks
     let unsubscribe = firebase
       .firestore()
-      .collection("tasks")
-      .where("userId", "==", "22796")
+      .collection('tasks')
+      .where('userId', '==', 'jlIFXIwyAL3tzHMtzRbw');
 
-    /* Note :
-     - if you're passing selectedProject and if it doesn't exists in the collatedTasksExist
-     */
     unsubscribe =
       selectedProject && !collatedTasksExist(selectedProject)
-        ? (unsubscribe = unsubscribe.where("projectId", "==", selectedProject))
-        : selectedProject === "TODAY"
+        ? (unsubscribe = unsubscribe.where('projectId', '==', selectedProject))
+        : selectedProject === 'TODAY'
         ? (unsubscribe = unsubscribe.where(
-            "date",
-            "==",
-            moment().format("DD/MM/YYYY")
+            'date',
+            '==',
+            moment().format('DD/MM/YYYY')
           ))
-        : selectedProject === "INBOX" || selectedProject === 0
-        ? (unsubscribe = unsubscribe.where("date", "==", ""))
-        : unsubscribe
+        : selectedProject === 'INBOX' || selectedProject === 0
+        ? (unsubscribe = unsubscribe.where('date', '==', ''))
+        : unsubscribe;
 
     unsubscribe = unsubscribe.onSnapshot(snapshot => {
       const newTasks = snapshot.docs.map(task => ({
         id: task.id,
-        ...task.data()
-      }))
-      // GET  next 7 Tasks
+        ...task.data(),
+      }));
+
       setTasks(
-        selectedProject === "NEXT_7"
+        selectedProject === 'NEXT_7'
           ? newTasks.filter(
               task =>
-                moment(task.date, "DD-MM-YYYY").diff(moment(), "days") <= 7 &&
+                moment(task.date, 'DD-MM-YYYY').diff(moment(), 'days') <= 7 &&
                 task.archived !== true
             )
           : newTasks.filter(task => task.archived !== true)
-      )
-      // GET task that is no false
-      setArchivedTasks(newTasks.filter(task => task.archived !== false))
-    })
-    return () => unsubscribe()
-  }, [selectedProject])
-  return { tasks, archivedTasks }
-}
+      );
+      setArchivedTasks(newTasks.filter(task => task.archived !== false));
+    });
+
+    return () => unsubscribe();
+  }, [selectedProject]);
+
+  return { tasks, archivedTasks };
+};
 
 export const useProjects = () => {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     firebase
       .firestore()
-      .collection("projects")
-      .where("userId", "==", "22796")
-      .orderBy("projectId")
+      .collection('projects')
+      .where('userId', '==', 'jlIFXIwyAL3tzHMtzRbw')
+      .orderBy('projectId')
       .get()
       .then(snapshot => {
         const allProjects = snapshot.docs.map(project => ({
           ...project.data(),
-          docId: project.id
-        }))
+          docId: project.id,
+        }));
 
-        // prevent infinite loop
         if (JSON.stringify(allProjects) !== JSON.stringify(projects)) {
-          setProjects(allProjects)
+          setProjects(allProjects);
         }
-      })
-  }, [projects])
+      });
+  }, [projects]);
 
-  return { projects, setProjects }
-}
+  return { projects, setProjects };
+};
