@@ -48,6 +48,7 @@ export const AddTask = ({
           userId: "jlIFXIwyAL3tzHMtzRbw"
         })
         .then(() => {
+          // reset everything
           setTask("")
           setProject("")
           setShowMain("")
